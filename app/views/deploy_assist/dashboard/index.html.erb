@@ -1,0 +1,111 @@
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Deployment Setup</h1>
+    <p class="mt-2 text-gray-600">Automate your deployment configuration for AWS, Google OAuth, SES, and Stripe</p>
+  </div>
+
+  <% if @current_setup.present? %>
+    <div class="bg-white shadow rounded-lg p-6 mb-6">
+      <div class="flex justify-between items-start">
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900"><%= @current_setup.app_display_name %></h2>
+          <p class="text-sm text-gray-500 mt-1">Environment: <%= @current_setup.environment.titleize %></p>
+          <% if @current_setup.domain.present? %>
+            <p class="text-sm text-gray-500">Domain: <%= @current_setup.domain %></p>
+          <% end %>
+        </div>
+        <div class="text-right">
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium <%= @current_setup.completed? ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' %>">
+            <%= @current_setup.setup_status.titleize %>
+          </span>
+          <p class="text-sm text-gray-500 mt-2"><%= @current_setup.setup_progress_percentage %>% Complete</p>
+        </div>
+      </div>
+
+      <% if @current_setup.setup_progress_percentage < 100 %>
+        <div class="mt-4">
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-blue-600 h-2 rounded-full" style="width: <%= @current_setup.setup_progress_percentage %>%"></div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <%
+        services = [
+          { type: :aws_deployment, name: 'AWS Deployment', description: 'Set up IAM, S3, RDS, and generate Kamal config', icon: '☁️' },
+          { type: :google_oauth, name: 'Google OAuth', description: 'Configure OAuth consent screen and credentials', icon: '🔐' },
+          { type: :aws_ses, name: 'AWS SES', description: 'Set up email sending with domain verification', icon: '✉️' },
+          { type: :stripe, name: 'Stripe Payments', description: 'Configure products, prices, and webhooks', icon: '💳' },
+          { type: :chrome_extension, name: 'Chrome Extension', description: 'Publish extension to Chrome Web Store', icon: '🧩' }
+        ]
+      %>
+
+      <% services.each do |service| %>
+        <% config = @current_setup.service_configurations.find_by(service_type: service[:type]) %>
+        <div class="bg-white shadow rounded-lg p-6 hover:shadow-lg transition-shadow">
+          <div class="flex items-start">
+            <div class="text-4xl mr-4"><%= service[:icon] %></div>
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold text-gray-900"><%= service[:name] %></h3>
+              <p class="text-sm text-gray-600 mt-1"><%= service[:description] %></p>
+
+              <% if config.present? %>
+                <div class="mt-4">
+                  <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium <%= config.completed? ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' %>">
+                    <%= config.status.titleize %>
+                  </span>
+                  <% if config.completion_percentage > 0 %>
+                    <span class="text-sm text-gray-500 ml-2"><%= config.completion_percentage %>%</span>
+                  <% end %>
+                </div>
+                <% if config.completed? %>
+                  <%= link_to "View Instructions", deploy_assist.instructions_path(config_id: config.id), class: "mt-3 inline-block text-sm text-blue-600 hover:text-blue-800" %>
+                <% else %>
+                  <%= link_to "Continue Setup", deploy_assist.configure_service_setup_path(@current_setup, service_type: service[:type]), class: "mt-3 inline-block text-sm text-blue-600 hover:text-blue-800" %>
+                <% end %>
+              <% else %>
+                <%= form_with url: deploy_assist.add_service_setup_path(@current_setup, service_type: service[:type]), method: :post, local: true, class: "mt-3 inline-block" do %>
+                  <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-[var(--color-accent-500)] hover:bg-[var(--color-accent-600)] transition-colors">
+                    Start Setup
+                  </button>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="bg-white shadow rounded-lg p-12 text-center">
+      <div class="text-6xl mb-4">🚀</div>
+      <h2 class="text-2xl font-semibold text-gray-900 mb-2">Welcome to DeployAssist!</h2>
+      <p class="text-gray-600 mb-6">Let's set up your deployment configuration</p>
+      <%= link_to "Get Started", deploy_assist.new_setup_path, class: "inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-[var(--color-accent-500)] hover:bg-[var(--color-accent-600)] shadow-lg shadow-[var(--color-accent-500)]/30 hover:shadow-xl transition-all duration-200" %>
+    </div>
+  <% end %>
+
+  <% if @deployment_setups.count > 1 %>
+    <div class="mt-8">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">All Environments</h3>
+      <div class="bg-white shadow rounded-lg overflow-hidden">
+        <ul class="divide-y divide-gray-200">
+          <% @deployment_setups.each do |setup| %>
+            <li class="p-4 hover:bg-gray-50 cursor-pointer">
+              <div class="flex justify-between items-center">
+                <div>
+                  <h4 class="text-sm font-medium text-gray-900"><%= setup.app_display_name %> (<%= setup.environment %>)</h4>
+                  <p class="text-sm text-gray-500"><%= setup.setup_progress_percentage %>% complete</p>
+                </div>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium <%= setup.completed? ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' %>">
+                  <%= setup.setup_status.titleize %>
+                </span>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  <% end %>
+</div>

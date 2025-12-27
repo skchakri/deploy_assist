@@ -1,0 +1,88 @@
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <%= render "deploy_assist/shared/header" %>
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">AWS SES Setup - Step 3 of 4</h1>
+    <p class="mt-2 text-gray-600">Additional Configuration</p>
+    <div class="mt-4 w-full bg-gray-200 rounded-full h-2">
+      <div class="bg-blue-600 h-2 rounded-full" style="width: 75%"></div>
+    </div>
+  </div>
+
+  <%= form_with url: deploy_assist.wizards_aws_ses_step_path(config_id: @service_configuration.id, step_number: 3),
+                method: :post,
+                local: true,
+                class: "space-y-6" do |form| %>
+
+    <div class="bg-white shadow rounded-lg p-6 space-y-6">
+      <div class="flex items-start">
+        <div class="flex items-center h-5">
+          <%= form.check_box "configuration[enable_configuration_set]",
+                            checked: @step_data['enable_configuration_set'] != 'false',
+                            class: "rounded border-gray-300 text-blue-600 focus:ring-blue-500" %>
+        </div>
+        <div class="ml-3">
+          <%= form.label :enable_configuration_set, "Enable Configuration Sets", class: "text-sm font-medium text-gray-700" %>
+          <p class="text-sm text-gray-500">Track email sending statistics and events</p>
+        </div>
+      </div>
+
+      <div class="flex items-start">
+        <div class="flex items-center h-5">
+          <%= form.check_box "configuration[enable_bounce_handling]",
+                            checked: @step_data['enable_bounce_handling'] != 'false',
+                            class: "rounded border-gray-300 text-blue-600 focus:ring-blue-500" %>
+        </div>
+        <div class="ml-3">
+          <%= form.label :enable_bounce_handling, "Enable Bounce/Complaint Handling", class: "text-sm font-medium text-gray-700" %>
+          <p class="text-sm text-gray-500">Automatically process bounces and complaints (recommended)</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-blue-50 rounded-lg p-4">
+      <h3 class="text-sm font-medium text-blue-900 mb-2">📊 Configuration Sets:</h3>
+      <p class="text-sm text-blue-700">
+        Configuration sets let you track:
+      </p>
+      <ul class="list-disc list-inside text-sm text-blue-700 mt-2 space-y-1 ml-4">
+        <li>Email delivery success/failure rates</li>
+        <li>Bounce and complaint rates</li>
+        <li>Open and click tracking (with SNS)</li>
+      </ul>
+    </div>
+
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-yellow-800">SES Sandbox Mode</h3>
+          <p class="text-sm text-yellow-700 mt-1">
+            New SES accounts start in sandbox mode:
+          </p>
+          <ul class="list-disc list-inside text-sm text-yellow-700 mt-1 ml-2">
+            <li>Can only send to verified email addresses</li>
+            <li>Limited to 200 emails/day</li>
+            <li>Must request production access (we'll guide you)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="flex justify-between items-center">
+      <%= link_to "Cancel", deploy_assist.root_path, class: "text-gray-600 hover:text-gray-900 font-medium" %>
+      <div class="flex gap-3">
+        <%= link_to deploy_assist.wizards_aws_ses_step_path(config_id: @service_configuration.id, step_number: 2), class: "px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors" do %>
+          ← Previous
+        <% end %>
+        <%= button_tag type: "submit", class: "px-6 py-2 bg-[var(--color-accent-500)] hover:bg-[var(--color-accent-600)] text-white font-medium rounded-lg transition-colors" do %>
+          Continue →
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

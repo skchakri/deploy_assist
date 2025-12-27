@@ -1,0 +1,138 @@
+<div class="max-w-3xl mx-auto py-8">
+  <%= render "deploy_assist/shared/header" %>
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Stripe Payment Setup</h1>
+    <p class="text-gray-600">Step 1 of 4: Business Information</p>
+
+    <!-- Progress bar -->
+    <div class="mt-4 w-full bg-gray-200 rounded-full h-2">
+      <div class="bg-blue-600 h-2 rounded-full" style="width: 25%"></div>
+    </div>
+  </div>
+
+  <%= form_with url: deploy_assist.wizards_stripe_step_path(config_id: @service_configuration.id, step_number: 1),
+                method: :patch,
+                local: true do |f| %>
+
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h2 class="text-xl font-semibold text-gray-900 mb-4">Business Details</h2>
+      <p class="text-sm text-gray-600 mb-6">
+        This information will be used to create your Stripe account and verify your business.
+      </p>
+
+      <div class="space-y-5">
+        <%= fields_for :business_details do |bd| %>
+
+          <!-- Legal Business Name -->
+          <div>
+            <%= bd.label :legal_business_name, "Legal Business Name", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= bd.text_field :legal_business_name,
+                value: @step_data[:legal_business_name] || @service_configuration.deployment_setup.app_name.titleize,
+                class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                placeholder: "Acme Corporation Inc.",
+                required: true %>
+            <p class="mt-1 text-xs text-gray-500">The registered legal name of your business</p>
+          </div>
+
+          <!-- Country -->
+          <div>
+            <%= bd.label :country, "Business Country", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= bd.select :country,
+                options_for_select([
+                  ['United States', 'US'],
+                  ['United Kingdom', 'GB'],
+                  ['Canada', 'CA'],
+                  ['Australia', 'AU'],
+                  ['Germany', 'DE'],
+                  ['France', 'FR'],
+                  ['India', 'IN'],
+                  ['Singapore', 'SG'],
+                  ['Japan', 'JP']
+                ], @step_data[:country] || 'US'),
+                {},
+                class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                required: true %>
+            <p class="mt-1 text-xs text-gray-500">Where your business is legally registered</p>
+          </div>
+
+          <!-- Business Type -->
+          <div>
+            <%= bd.label :business_type, "Business Type", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= bd.select :business_type,
+                options_for_select([
+                  ['Individual / Sole Proprietor', 'individual'],
+                  ['Company / Corporation', 'company'],
+                  ['Non-profit', 'non_profit'],
+                  ['Government Entity', 'government_entity']
+                ], @step_data[:business_type] || 'company'),
+                {},
+                class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                required: true %>
+          </div>
+
+          <!-- Business URL -->
+          <div>
+            <%= bd.label :business_url, "Business Website", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= bd.url_field :business_url,
+                value: @step_data[:business_url] || "https://#{@service_configuration.deployment_setup.domain}",
+                class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                placeholder: "https://yourapp.com",
+                required: true %>
+          </div>
+
+          <!-- Support Email -->
+          <div>
+            <%= bd.label :support_email, "Support Email", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= bd.email_field :support_email,
+                value: @step_data[:support_email] || "support@#{@service_configuration.deployment_setup.domain}",
+                class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                placeholder: "support@yourapp.com",
+                required: true %>
+            <p class="mt-1 text-xs text-gray-500">Customers will use this to contact you</p>
+          </div>
+
+          <!-- Support Phone -->
+          <div>
+            <%= bd.label :support_phone, "Support Phone (Optional)", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= bd.telephone_field :support_phone,
+                value: @step_data[:support_phone],
+                class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                placeholder: "+1 (555) 123-4567" %>
+          </div>
+
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Info Box -->
+    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-blue-800">Stripe Account Requirement</h3>
+          <div class="mt-2 text-sm text-blue-700">
+            <p>You'll need to create a Stripe account if you don't have one. We'll provide detailed instructions in the setup guide.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="flex justify-between items-center">
+      <%= link_to "Cancel", deploy_assist.root_path, class: "text-gray-600 hover:text-gray-900 font-medium" %>
+      <div class="flex gap-3">
+        <button type="button" disabled class="px-6 py-2 bg-gray-300 text-gray-500 font-medium rounded-lg cursor-not-allowed">
+          ← Previous
+        </button>
+        <%= button_tag type: "submit", class: "px-6 py-2 bg-[var(--color-accent-500)] hover:bg-[var(--color-accent-600)] text-white font-medium rounded-lg transition-colors" do %>
+          Continue →
+        <% end %>
+      </div>
+    </div>
+
+  <% end %>
+</div>

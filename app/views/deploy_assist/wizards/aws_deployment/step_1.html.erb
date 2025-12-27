@@ -1,0 +1,67 @@
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <%= render "deploy_assist/shared/header" %>
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">AWS Deployment Setup - Step 1 of 4</h1>
+    <p class="mt-2 text-gray-600">Business Information</p>
+    <div class="mt-4 w-full bg-gray-200 rounded-full h-2">
+      <div class="bg-blue-600 h-2 rounded-full" style="width: 25%"></div>
+    </div>
+  </div>
+
+  <%= form_with url: deploy_assist.wizards_aws_deployment_step_path(config_id: @service_configuration.id, step_number: 1),
+                method: :post,
+                local: true,
+                class: "space-y-6" do |form| %>
+
+    <div class="bg-white shadow rounded-lg p-6 space-y-6">
+      <div>
+        <%= form.label :company_name, "Company Name", class: "block text-sm font-medium text-gray-700" %>
+        <%= form.text_field "business_info[company_name]",
+                           value: @step_data['company_name'],
+                           required: true,
+                           class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+        <p class="mt-1 text-sm text-gray-500">Your company or organization name</p>
+      </div>
+
+      <div>
+        <%= form.label :contact_email, "Contact Email", class: "block text-sm font-medium text-gray-700" %>
+        <%= form.email_field "business_info[contact_email]",
+                            value: @step_data['contact_email'] || current_user.email,
+                            required: true,
+                            class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+        <p class="mt-1 text-sm text-gray-500">Primary contact for this deployment</p>
+      </div>
+
+      <div>
+        <%= form.label :docker_username, "Docker Hub Username", class: "block text-sm font-medium text-gray-700" %>
+        <%= form.text_field "business_info[docker_username]",
+                           value: @step_data['docker_username'],
+                           required: true,
+                           class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+        <p class="mt-1 text-sm text-gray-500">Your Docker Hub username for container registry</p>
+      </div>
+
+      <div>
+        <%= form.label :project_description, "Project Description", class: "block text-sm font-medium text-gray-700" %>
+        <%= form.text_area "business_info[project_description]",
+                          value: @step_data['project_description'],
+                          rows: 3,
+                          class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+        <p class="mt-1 text-sm text-gray-500">Brief description of your application (optional)</p>
+      </div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="flex justify-between items-center">
+      <%= link_to "Cancel", deploy_assist.root_path, class: "text-gray-600 hover:text-gray-900 font-medium" %>
+      <div class="flex gap-3">
+        <button type="button" disabled class="px-6 py-2 bg-gray-300 text-gray-500 font-medium rounded-lg cursor-not-allowed">
+          ← Previous
+        </button>
+        <%= button_tag type: "submit", class: "px-6 py-2 bg-[var(--color-accent-500)] hover:bg-[var(--color-accent-600)] text-white font-medium rounded-lg transition-colors" do %>
+          Continue →
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

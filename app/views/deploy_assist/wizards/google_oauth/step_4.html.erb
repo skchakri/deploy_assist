@@ -1,0 +1,139 @@
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <%= render "deploy_assist/shared/header" %>
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Google OAuth Setup - Step 4 of 4</h1>
+    <p class="mt-2 text-gray-600">Review & Configure</p>
+  </div>
+
+  <%= form_with url: deploy_assist.wizards_google_oauth_step_path(step_number: 4, config_id: params[:config_id]), method: :patch, local: true do |f| %>
+    <!-- Project Information Summary -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Project Information</h2>
+      <dl class="grid grid-cols-1 gap-4">
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Application Name</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @service_configuration&.collected_data&.dig('application_name') || 'Not provided' %></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">User Support Email</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @service_configuration&.collected_data&.dig('user_support_email') || 'Not provided' %></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Developer Contact Email</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @service_configuration&.collected_data&.dig('developer_contact_email') || 'Not provided' %></dd>
+        </div>
+      </dl>
+    </div>
+
+    <!-- OAuth Consent Screen Summary -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">OAuth Consent Screen</h2>
+      <dl class="grid grid-cols-1 gap-4">
+        <% if @service_configuration&.collected_data&.dig('app_logo_url').present? %>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">App Logo URL</dt>
+            <dd class="mt-1 text-sm text-gray-900 break-all"><%= @service_configuration&.collected_data&.dig('app_logo_url') %></dd>
+          </div>
+        <% end %>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Application Homepage URL</dt>
+          <dd class="mt-1 text-sm text-gray-900 break-all"><%= @service_configuration&.collected_data&.dig('application_homepage_url') || 'Not provided' %></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Application Privacy Policy URL</dt>
+          <dd class="mt-1 text-sm text-gray-900 break-all"><%= @service_configuration&.collected_data&.dig('application_privacy_policy_url') || 'Not provided' %></dd>
+        </div>
+        <% if @service_configuration&.collected_data&.dig('application_terms_of_service_url').present? %>
+          <div>
+            <dt class="text-sm font-medium text-gray-500">Application Terms of Service URL</dt>
+            <dd class="mt-1 text-sm text-gray-900 break-all"><%= @service_configuration&.collected_data&.dig('application_terms_of_service_url') %></dd>
+          </div>
+        <% end %>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Authorized Domains</dt>
+          <dd class="mt-1 text-sm text-gray-900 font-mono whitespace-pre-wrap"><%= @service_configuration&.collected_data&.dig('authorized_domains') || 'Not provided' %></dd>
+        </div>
+      </dl>
+    </div>
+
+    <!-- Scopes Summary -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">OAuth Scopes</h2>
+      <div class="flex flex-wrap gap-2">
+        <% scopes = @service_configuration&.collected_data&.dig('scopes') || ['userinfo.email', 'userinfo.profile', 'openid'] %>
+        <% if scopes.is_a?(Hash) %>
+          <% scopes.each do |key, value| %>
+            <% if value == 'userinfo.email' || value == 'userinfo.profile' || value == 'openid' %>
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                <%= value %>
+              </span>
+            <% end %>
+          <% end %>
+        <% elsif scopes.is_a?(Array) %>
+          <% scopes.each do |scope| %>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+              <%= scope %>
+            </span>
+          <% end %>
+        <% end %>
+        <% if scopes.blank? || (scopes.is_a?(Hash) && scopes.empty?) || (scopes.is_a?(Array) && scopes.empty?) %>
+          <span class="text-sm text-gray-500">No scopes selected</span>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Next Steps Info Box -->
+    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-blue-800">Next steps to complete in Google Cloud Console:</h3>
+          <div class="mt-2 text-sm text-blue-700">
+            <ol class="list-decimal list-inside space-y-1">
+              <li>Create a new project or select an existing one in Google Cloud Console</li>
+              <li>Enable the Google+ API for your project</li>
+              <li>Configure the OAuth consent screen with the information above</li>
+              <li>Create OAuth 2.0 credentials (Web application type)</li>
+              <li>Add authorized redirect URIs for your application</li>
+              <li>Copy the Client ID and Client Secret to your Rails credentials</li>
+              <li>Configure the Devise initializer with your OAuth settings</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Warning Box -->
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm text-yellow-700">
+            <strong>Important:</strong> After clicking "Complete Setup", you'll receive detailed instructions with links to configure everything in the Google Cloud Console. Keep your Client ID and Client Secret secure - never commit them to version control.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="flex justify-between items-center">
+      <%= link_to "Cancel", deploy_assist.root_path, class: "text-gray-600 hover:text-gray-900 font-medium" %>
+      <div class="flex gap-3">
+        <%= link_to deploy_assist.wizards_google_oauth_step_path(step_number: 3, config_id: params[:config_id]), class: "px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors" do %>
+          ← Previous
+        <% end %>
+        <%= button_tag type: "submit", class: "px-6 py-2 bg-[var(--color-accent-500)] hover:bg-[var(--color-accent-600)] text-white font-medium rounded-lg transition-colors" do %>
+          Complete Setup
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

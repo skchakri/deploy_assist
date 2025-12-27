@@ -1,0 +1,146 @@
+<div class="max-w-3xl mx-auto py-8">
+  <%= render "deploy_assist/shared/header" %>
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Stripe Payment Setup</h1>
+    <p class="text-gray-600">Step 2 of 4: Product Configuration</p>
+
+    <!-- Progress bar -->
+    <div class="mt-4 w-full bg-gray-200 rounded-full h-2">
+      <div class="bg-blue-600 h-2 rounded-full" style="width: 50%"></div>
+    </div>
+  </div>
+
+  <%= form_with url: deploy_assist.wizards_stripe_step_path(config_id: @service_configuration.id, step_number: 2),
+                method: :patch,
+                local: true do |f| %>
+
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h2 class="text-xl font-semibold text-gray-900 mb-4">Define Your Products</h2>
+      <p class="text-sm text-gray-600 mb-6">
+        Configure the products or services you'll be selling through Stripe.
+      </p>
+
+      <div class="space-y-5">
+        <%= fields_for :products do |p| %>
+
+          <!-- Product Names -->
+          <div>
+            <%= p.label :product_names, "Product Names", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= p.text_area :product_names,
+                value: @step_data[:product_names] || "Basic Plan\nPro Plan\nEnterprise Plan",
+                rows: 4,
+                class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm",
+                placeholder: "Basic Plan\nPro Plan\nEnterprise Plan",
+                required: true %>
+            <p class="mt-1 text-xs text-gray-500">One product per line. We'll help you set prices later.</p>
+          </div>
+
+          <!-- Price Type -->
+          <div>
+            <%= p.label :price_type, "Pricing Model", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= p.select :price_type,
+                options_for_select([
+                  ['One-time payment', 'one_time'],
+                  ['Recurring subscription', 'recurring'],
+                  ['Both one-time and subscription', 'both']
+                ], @step_data[:price_type] || 'recurring'),
+                {},
+                class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                required: true %>
+          </div>
+
+          <!-- Currency -->
+          <div>
+            <%= p.label :currency, "Currency", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= p.select :currency,
+                options_for_select([
+                  ['USD - US Dollar', 'usd'],
+                  ['EUR - Euro', 'eur'],
+                  ['GBP - British Pound', 'gbp'],
+                  ['CAD - Canadian Dollar', 'cad'],
+                  ['AUD - Australian Dollar', 'aud'],
+                  ['INR - Indian Rupee', 'inr'],
+                  ['JPY - Japanese Yen', 'jpy'],
+                  ['SGD - Singapore Dollar', 'sgd']
+                ], @step_data[:currency] || 'usd'),
+                {},
+                class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                required: true %>
+          </div>
+
+          <!-- Enable Subscriptions -->
+          <div class="bg-gray-50 rounded-lg p-4">
+            <div class="flex items-start">
+              <%= p.check_box :enable_subscriptions,
+                  checked: @step_data[:enable_subscriptions] != false,
+                  class: "mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" %>
+              <div class="ml-3">
+                <%= p.label :enable_subscriptions, class: "text-sm font-medium text-gray-700" do %>
+                  Enable subscription features
+                <% end %>
+                <p class="mt-1 text-xs text-gray-500">
+                  Allows recurring billing, trial periods, and subscription management
+                </p>
+              </div>
+            </div>
+          </div>
+
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Product Examples -->
+    <div class="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-5 mb-6">
+      <h3 class="text-sm font-semibold text-purple-900 mb-3">💡 Common Product Structures</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div class="bg-white rounded p-3">
+          <h4 class="font-medium text-gray-900 mb-1">SaaS Application</h4>
+          <p class="text-xs text-gray-600">Starter Plan<br>Professional Plan<br>Enterprise Plan</p>
+        </div>
+        <div class="bg-white rounded p-3">
+          <h4 class="font-medium text-gray-900 mb-1">E-commerce</h4>
+          <p class="text-xs text-gray-600">One-time product purchases<br>Digital downloads<br>Physical goods</p>
+        </div>
+        <div class="bg-white rounded p-3">
+          <h4 class="font-medium text-gray-900 mb-1">Course Platform</h4>
+          <p class="text-xs text-gray-600">Course Bundle<br>Monthly Membership<br>Lifetime Access</p>
+        </div>
+        <div class="bg-white rounded p-3">
+          <h4 class="font-medium text-gray-900 mb-1">Service Business</h4>
+          <p class="text-xs text-gray-600">Consultation<br>Monthly Retainer<br>Project Package</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Box -->
+    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-blue-800">Setting Prices</h3>
+          <div class="mt-2 text-sm text-blue-700">
+            <p>You'll set specific prices in the Stripe Dashboard. We'll provide detailed instructions for creating products and pricing tiers.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="flex justify-between items-center">
+      <%= link_to "Cancel", deploy_assist.root_path, class: "text-gray-600 hover:text-gray-900 font-medium" %>
+      <div class="flex gap-3">
+        <%= link_to deploy_assist.wizards_stripe_step_path(config_id: @service_configuration.id, step_number: 1), class: "px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors" do %>
+          ← Previous
+        <% end %>
+        <%= button_tag type: "submit", class: "px-6 py-2 bg-[var(--color-accent-500)] hover:bg-[var(--color-accent-600)] text-white font-medium rounded-lg transition-colors" do %>
+          Continue →
+        <% end %>
+      </div>
+    </div>
+
+  <% end %>
+</div>

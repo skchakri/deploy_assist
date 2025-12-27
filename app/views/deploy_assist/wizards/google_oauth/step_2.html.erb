@@ -1,0 +1,95 @@
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <%= render "deploy_assist/shared/header" %>
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Google OAuth Setup - Step 2 of 4</h1>
+    <p class="mt-2 text-gray-600">OAuth Consent Screen</p>
+  </div>
+
+  <%= form_with url: deploy_assist.wizards_google_oauth_step_path(step_number: 2, config_id: params[:config_id]), method: :patch, local: true do |f| %>
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <div class="space-y-6">
+        <!-- App Logo URL -->
+        <div>
+          <%= label_tag :app_logo_url, "App Logo URL", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= text_field_tag 'consent_screen[app_logo_url]', @service_configuration&.collected_data&.dig('app_logo_url'),
+              class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+              placeholder: "https://yourapp.com/logo.png" %>
+          <p class="mt-1 text-sm text-gray-500">Optional. Square logo (120x120px minimum) shown on OAuth consent screen</p>
+        </div>
+
+        <!-- Application Homepage URL -->
+        <div>
+          <%= label_tag :application_homepage_url, "Application Homepage URL", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= text_field_tag 'consent_screen[application_homepage_url]', @service_configuration&.collected_data&.dig('application_homepage_url'),
+              class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+              placeholder: "https://yourapp.com",
+              required: true %>
+          <p class="mt-1 text-sm text-gray-500">Your application's main website URL</p>
+        </div>
+
+        <!-- Application Privacy Policy URL -->
+        <div>
+          <%= label_tag :application_privacy_policy_url, "Application Privacy Policy URL", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= text_field_tag 'consent_screen[application_privacy_policy_url]', @service_configuration&.collected_data&.dig('application_privacy_policy_url'),
+              class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+              placeholder: "https://yourapp.com/privacy",
+              required: true %>
+          <p class="mt-1 text-sm text-gray-500">Required by Google. Must be publicly accessible</p>
+        </div>
+
+        <!-- Application Terms of Service URL -->
+        <div>
+          <%= label_tag :application_terms_of_service_url, "Application Terms of Service URL", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= text_field_tag 'consent_screen[application_terms_of_service_url]', @service_configuration&.collected_data&.dig('application_terms_of_service_url'),
+              class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+              placeholder: "https://yourapp.com/terms" %>
+          <p class="mt-1 text-sm text-gray-500">Optional, but recommended for user trust</p>
+        </div>
+
+        <!-- Authorized Domains -->
+        <div>
+          <%= label_tag :authorized_domains, "Authorized Domains", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= text_area_tag 'consent_screen[authorized_domains]', @service_configuration&.collected_data&.dig('authorized_domains'),
+              class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm",
+              placeholder: "yourapp.com\nlocalhost",
+              rows: 4 %>
+          <p class="mt-1 text-sm text-gray-500">Enter one domain per line. These domains will be authorized for OAuth redirects</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Box -->
+    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-blue-800">Important notes:</h3>
+          <div class="mt-2 text-sm text-blue-700">
+            <ul class="list-disc list-inside space-y-1">
+              <li>Privacy Policy URL is required by Google for all OAuth applications</li>
+              <li>All URLs must be publicly accessible (not localhost)</li>
+              <li>Authorized domains should match where your app is hosted</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="flex justify-between items-center">
+      <%= link_to "Cancel", deploy_assist.root_path, class: "text-gray-600 hover:text-gray-900 font-medium" %>
+      <div class="flex gap-3">
+        <%= link_to deploy_assist.wizards_google_oauth_step_path(step_number: 1, config_id: params[:config_id]), class: "px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors" do %>
+          ← Previous
+        <% end %>
+        <%= button_tag type: "submit", class: "px-6 py-2 bg-[var(--color-accent-500)] hover:bg-[var(--color-accent-600)] text-white font-medium rounded-lg transition-colors" do %>
+          Continue →
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

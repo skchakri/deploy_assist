@@ -1,0 +1,173 @@
+<div class="max-w-3xl mx-auto py-8">
+  <%= render "deploy_assist/shared/header" %>
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Chrome Extension Setup</h1>
+    <p class="text-gray-600">Step 1 of 4: Extension Details</p>
+
+    <!-- Progress bar -->
+    <div class="mt-4 w-full bg-gray-200 rounded-full h-2">
+      <div class="bg-blue-600 h-2 rounded-full" style="width: 25%"></div>
+    </div>
+  </div>
+
+  <%= form_with url: deploy_assist.wizards_chrome_extension_step_path(config_id: @service_configuration.id, step_number: 1),
+                method: :patch,
+                local: true do |f| %>
+
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h2 class="text-xl font-semibold text-gray-900 mb-4">Extension Information</h2>
+      <p class="text-sm text-gray-600 mb-6">
+        Provide basic information about your Chrome extension.
+      </p>
+
+      <div class="space-y-5">
+        <%= fields_for :extension_details do |ed| %>
+
+          <!-- Extension Name -->
+          <div>
+            <%= ed.label :extension_name, "Extension Name", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= ed.text_field :extension_name,
+                value: @step_data[:extension_name],
+                class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                placeholder: "My Awesome Extension",
+                required: true,
+                maxlength: 45 %>
+            <p class="mt-1 text-xs text-gray-500">Maximum 45 characters - this appears in the Chrome Web Store</p>
+          </div>
+
+          <!-- Short Description -->
+          <div>
+            <%= ed.label :short_description, "Short Description", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= ed.text_area :short_description,
+                value: @step_data[:short_description],
+                rows: 2,
+                class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                placeholder: "A brief one-line description of what your extension does",
+                required: true,
+                maxlength: 132 %>
+            <p class="mt-1 text-xs text-gray-500">Maximum 132 characters - shows in search results</p>
+          </div>
+
+          <!-- Detailed Description -->
+          <div>
+            <%= ed.label :detailed_description, "Detailed Description", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= ed.text_area :detailed_description,
+                value: @step_data[:detailed_description],
+                rows: 6,
+                class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                placeholder: "Provide a detailed description of your extension's features, benefits, and how it works...",
+                required: true %>
+            <p class="mt-1 text-xs text-gray-500">Full description shown on your extension's store page</p>
+          </div>
+
+          <!-- Category -->
+          <div>
+            <%= ed.label :category, "Category", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= ed.select :category,
+                options_for_select([
+                  ['Productivity', 'productivity'],
+                  ['Developer Tools', 'developer_tools'],
+                  ['Communication', 'communication'],
+                  ['Shopping', 'shopping'],
+                  ['Entertainment', 'entertainment'],
+                  ['News & Weather', 'news_weather'],
+                  ['Social & Communication', 'social'],
+                  ['Accessibility', 'accessibility'],
+                  ['Fun', 'fun'],
+                  ['Photos', 'photos']
+                ], @step_data[:category] || 'productivity'),
+                {},
+                class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                required: true %>
+          </div>
+
+          <!-- Primary Language -->
+          <div>
+            <%= ed.label :primary_language, "Primary Language", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= ed.select :primary_language,
+                options_for_select([
+                  ['English', 'en'],
+                  ['Spanish', 'es'],
+                  ['French', 'fr'],
+                  ['German', 'de'],
+                  ['Japanese', 'ja'],
+                  ['Chinese (Simplified)', 'zh-CN'],
+                  ['Hindi', 'hi'],
+                  ['Portuguese', 'pt']
+                ], @step_data[:primary_language] || 'en'),
+                {},
+                class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                required: true %>
+          </div>
+
+          <!-- Permissions -->
+          <div>
+            <%= ed.label :permissions, "Required Permissions", class: "block text-sm font-medium text-gray-700 mb-3" %>
+
+            <% chrome_permissions = [
+              { id: 'activeTab', label: 'Active Tab', description: 'Access the currently active tab' },
+              { id: 'storage', label: 'Storage', description: 'Store data locally' },
+              { id: 'tabs', label: 'Tabs', description: 'Access browser tabs' },
+              { id: 'cookies', label: 'Cookies', description: 'Access and modify cookies' },
+              { id: 'notifications', label: 'Notifications', description: 'Display notifications' },
+              { id: 'contextMenus', label: 'Context Menus', description: 'Add context menu items' },
+              { id: 'webRequest', label: 'Web Request', description: 'Intercept network requests' },
+              { id: 'identity', label: 'Identity', description: 'Access user identity' }
+            ] %>
+
+            <% selected_permissions = @step_data[:permissions] || ['storage', 'activeTab'] %>
+
+            <div class="space-y-2">
+              <% chrome_permissions.each do |permission| %>
+                <div class="flex items-start bg-gray-50 border border-gray-200 rounded-lg p-3">
+                  <%= ed.check_box :permissions,
+                      { multiple: true, checked: selected_permissions.include?(permission[:id]) },
+                      permission[:id],
+                      nil,
+                      class: "mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" %>
+                  <div class="ml-3">
+                    <label class="text-sm font-medium text-gray-900"><%= permission[:label] %></label>
+                    <p class="text-xs text-gray-500"><%= permission[:description] %></p>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+            <p class="mt-2 text-xs text-gray-500">⚠️ Only request permissions you actually need - excessive permissions slow approval</p>
+          </div>
+
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Info Box -->
+    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-blue-800">Chrome Web Store Review Process</h3>
+          <div class="mt-2 text-sm text-blue-700">
+            <p>Review typically takes 1-3 business days. Extensions with sensitive permissions (like webRequest) may take longer and require additional justification.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="flex justify-between items-center">
+      <%= link_to "Cancel", deploy_assist.root_path, class: "text-gray-600 hover:text-gray-900 font-medium" %>
+      <div class="flex gap-3">
+        <button type="button" disabled class="px-6 py-2 bg-gray-300 text-gray-500 font-medium rounded-lg cursor-not-allowed">
+          ← Previous
+        </button>
+        <%= button_tag type: "submit", class: "px-6 py-2 bg-[var(--color-accent-500)] hover:bg-[var(--color-accent-600)] text-white font-medium rounded-lg transition-colors" do %>
+          Continue →
+        <% end %>
+      </div>
+    </div>
+
+  <% end %>
+</div>

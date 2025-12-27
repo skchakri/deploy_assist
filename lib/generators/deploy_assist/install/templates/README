@@ -1,0 +1,14 @@
+===============================================================================
+
+DeployAssist has been installed!
+
+Next steps:
+  1. Run migrations: rails db:migrate
+  2. Start your server: rails server
+  3. Visit /admin/deploy_setup to begin setup
+
+The engine has been mounted at: /admin/deploy_setup
+
+Configuration file created at: config/initializers/deploy_assist.rb
+
+===============================================================================

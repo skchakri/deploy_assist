@@ -1,0 +1,99 @@
+<div class="max-w-5xl mx-auto px-4 py-8">
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Setup Instructions</h1>
+        <p class="mt-2 text-gray-600">
+          <%= @service_configuration.service_type.titleize %> configuration complete!
+        </p>
+      </div>
+      <%= link_to "← Back to Dashboard", deploy_assist.root_path, class: "text-blue-600 hover:text-blue-800" %>
+    </div>
+
+    <div class="mt-6 bg-green-50 border-l-4 border-green-400 p-4">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm text-green-700">
+            <strong>Automation Complete!</strong> We've created the necessary AWS resources. Follow the instructions below to complete your deployment.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="space-y-6">
+    <% @instructions.each do |instruction| %>
+      <div class="bg-white shadow rounded-lg overflow-hidden <%= instruction.completed? ? 'opacity-60' : '' %>">
+        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
+          <div class="flex items-center">
+            <% if instruction.completed? %>
+              <svg class="h-6 w-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            <% else %>
+              <div class="h-6 w-6 rounded-full border-2 border-gray-300 mr-3 flex items-center justify-center">
+                <span class="text-xs font-medium text-gray-500"><%= instruction.step_number %></span>
+              </div>
+            <% end %>
+            <h2 class="text-lg font-semibold text-gray-900"><%= instruction.title %></h2>
+          </div>
+
+          <% unless instruction.completed? %>
+            <%= button_to "Mark Complete", mark_complete_instruction_path(instruction, config_id: @service_configuration.id),
+                         method: :post,
+                         class: "px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700" %>
+          <% end %>
+        </div>
+
+        <div class="px-6 py-4">
+          <div class="prose prose-sm max-w-none">
+            <%= simple_format(instruction.instruction_text) %>
+          </div>
+
+          <% if instruction.instruction_type == 'copy_snippet' && instruction.data['snippet'].present? %>
+            <div class="mt-4 relative">
+              <pre class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm"><code><%= instruction.data['snippet'] %></code></pre>
+              <button
+                onclick="navigator.clipboard.writeText(this.dataset.snippet); this.textContent = 'Copied!'; setTimeout(() => this.textContent = 'Copy', 2000)"
+                data-snippet="<%= instruction.data['snippet'] %>"
+                class="absolute top-2 right-2 px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-xs rounded"
+              >
+                Copy
+              </button>
+            </div>
+            <% if instruction.data['filename'].present? %>
+              <p class="mt-2 text-sm text-gray-500">
+                📝 File: <code class="bg-gray-100 px-2 py-1 rounded"><%= instruction.data['filename'] %></code>
+              </p>
+            <% end %>
+          <% end %>
+
+          <% if instruction.instruction_type == 'external_link' && instruction.data['url'].present? %>
+            <div class="mt-4">
+              <%= link_to instruction.data['url'], target: '_blank', class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" do %>
+                Open Console →
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @instructions.all?(&:completed?) %>
+    <div class="mt-8 bg-blue-50 border-l-4 border-blue-400 p-6 rounded">
+      <h3 class="text-lg font-semibold text-blue-900 mb-2">🎉 All steps complete!</h3>
+      <p class="text-blue-700">
+        Your <%= @service_configuration.service_type.titleize %> setup is ready. You can now proceed with deploying your application.
+      </p>
+      <div class="mt-4">
+        <%= link_to "Back to Dashboard", deploy_assist.root_path, class: "inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" %>
+      </div>
+    </div>
+  <% end %>
+</div>

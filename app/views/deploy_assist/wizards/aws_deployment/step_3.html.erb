@@ -1,0 +1,103 @@
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <%= render "deploy_assist/shared/header" %>
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">AWS Deployment Setup - Step 3 of 4</h1>
+    <p class="mt-2 text-gray-600">Infrastructure Configuration</p>
+    <div class="mt-4 w-full bg-gray-200 rounded-full h-2">
+      <div class="bg-blue-600 h-2 rounded-full" style="width: 75%"></div>
+    </div>
+  </div>
+
+  <%= form_with url: deploy_assist.wizards_aws_deployment_step_path(config_id: @service_configuration.id, step_number: 3),
+                method: :post,
+                local: true,
+                class: "space-y-6" do |form| %>
+
+    <div class="bg-white shadow rounded-lg p-6 space-y-6">
+      <h2 class="text-lg font-semibold text-gray-900">Database Configuration</h2>
+
+      <div>
+        <%= form.label :db_instance_class, "Database Instance Class", class: "block text-sm font-medium text-gray-700" %>
+        <%= form.select "infrastructure[db_instance_class]",
+                       options_for_select([
+                         ["db.t3.micro - 1 vCPU, 1 GB RAM (Free tier eligible)", "db.t3.micro"],
+                         ["db.t3.small - 2 vCPUs, 2 GB RAM (Recommended)", "db.t3.small"],
+                         ["db.t3.medium - 2 vCPUs, 4 GB RAM", "db.t3.medium"]
+                       ], @step_data['db_instance_class'] || 'db.t3.small'),
+                       {},
+                       class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+      </div>
+
+      <div>
+        <%= form.label :storage_gb, "Storage Size (GB)", class: "block text-sm font-medium text-gray-700" %>
+        <%= form.number_field "infrastructure[storage_gb]",
+                             value: @step_data['storage_gb'] || 20,
+                             min: 20,
+                             max: 1000,
+                             required: true,
+                             class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+        <p class="mt-1 text-sm text-gray-500">Minimum: 20 GB</p>
+      </div>
+
+      <div class="flex items-start">
+        <div class="flex items-center h-5">
+          <%= form.check_box "infrastructure[multi_az]",
+                            checked: @step_data['multi_az'] == 'true',
+                            class: "rounded border-gray-300 text-blue-600 focus:ring-blue-500" %>
+        </div>
+        <div class="ml-3">
+          <%= form.label :multi_az, "Enable Multi-AZ Deployment", class: "text-sm font-medium text-gray-700" %>
+          <p class="text-sm text-gray-500">Provides high availability (increases cost)</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white shadow rounded-lg p-6 space-y-6">
+      <h2 class="text-lg font-semibold text-gray-900">Storage Configuration</h2>
+
+      <div class="flex items-start">
+        <div class="flex items-center h-5">
+          <%= form.check_box "infrastructure[create_s3_bucket]",
+                            checked: @step_data['create_s3_bucket'] != 'false',
+                            class: "rounded border-gray-300 text-blue-600 focus:ring-blue-500" %>
+        </div>
+        <div class="ml-3">
+          <%= form.label :create_s3_bucket, "Create S3 Bucket", class: "text-sm font-medium text-gray-700" %>
+          <p class="text-sm text-gray-500">For Active Storage uploads and file storage</p>
+        </div>
+      </div>
+
+      <div>
+        <%= form.label :s3_bucket_name, "S3 Bucket Name (Optional)", class: "block text-sm font-medium text-gray-700" %>
+        <%= form.text_field "infrastructure[s3_bucket_name]",
+                           value: @step_data['s3_bucket_name'],
+                           placeholder: "Auto-generated if empty",
+                           class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+        <p class="mt-1 text-sm text-gray-500">Leave empty to auto-generate: app-name-production-storage</p>
+      </div>
+    </div>
+
+    <div class="bg-blue-50 rounded-lg p-4">
+      <h3 class="text-sm font-medium text-blue-900 mb-2">💰 Estimated Monthly Cost</h3>
+      <ul class="text-sm text-blue-700 space-y-1">
+        <li>• Database (db.t3.small): ~$25/month</li>
+        <li>• Storage (20 GB): ~$2/month</li>
+        <li>• S3 Storage: ~$0.023/GB/month</li>
+        <li class="font-semibold">Total: ~$30-35/month</li>
+      </ul>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="flex justify-between items-center">
+      <%= link_to "Cancel", deploy_assist.root_path, class: "text-gray-600 hover:text-gray-900 font-medium" %>
+      <div class="flex gap-3">
+        <%= link_to deploy_assist.wizards_aws_deployment_step_path(config_id: @service_configuration.id, step_number: 2), class: "px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors" do %>
+          ← Previous
+        <% end %>
+        <%= button_tag type: "submit", class: "px-6 py-2 bg-[var(--color-accent-500)] hover:bg-[var(--color-accent-600)] text-white font-medium rounded-lg transition-colors" do %>
+          Continue →
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,103 @@
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <%= render "deploy_assist/shared/header" %>
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">Google OAuth Setup - Step 3 of 4</h1>
+    <p class="mt-2 text-gray-600">Scopes</p>
+  </div>
+
+  <%= form_with url: deploy_assist.wizards_google_oauth_step_path(step_number: 3, config_id: params[:config_id]), method: :patch, local: true do |f| %>
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Select OAuth Scopes</h3>
+          <p class="text-sm text-gray-600 mb-4">Choose which user information your application needs to access. Only select the scopes you actually need.</p>
+
+          <div class="space-y-4">
+            <!-- userinfo.email scope -->
+            <div class="flex items-start p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+              <div class="flex items-center h-5 mt-1">
+                <%= check_box_tag 'scopes[userinfo.email]',
+                    'userinfo.email',
+                    @service_configuration&.collected_data&.dig('scopes')&.include?('userinfo.email') || true,
+                    class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+              </div>
+              <div class="ml-3">
+                <%= label_tag 'scopes_userinfo_email', class: "block" do %>
+                  <span class="text-sm font-medium text-gray-900">userinfo.email</span>
+                  <p class="text-sm text-gray-500 mt-1">Read the user's email address. Essential for most OAuth implementations to identify and communicate with users.</p>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- userinfo.profile scope -->
+            <div class="flex items-start p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+              <div class="flex items-center h-5 mt-1">
+                <%= check_box_tag 'scopes[userinfo.profile]',
+                    'userinfo.profile',
+                    @service_configuration&.collected_data&.dig('scopes')&.include?('userinfo.profile') || true,
+                    class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+              </div>
+              <div class="ml-3">
+                <%= label_tag 'scopes_userinfo_profile', class: "block" do %>
+                  <span class="text-sm font-medium text-gray-900">userinfo.profile</span>
+                  <p class="text-sm text-gray-500 mt-1">Read basic profile information including name, profile picture, and locale. Useful for personalizing the user experience.</p>
+                <% end %>
+              </div>
+            </div>
+
+            <!-- openid scope -->
+            <div class="flex items-start p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+              <div class="flex items-center h-5 mt-1">
+                <%= check_box_tag 'scopes[openid]',
+                    'openid',
+                    @service_configuration&.collected_data&.dig('scopes')&.include?('openid') || true,
+                    class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+              </div>
+              <div class="ml-3">
+                <%= label_tag 'scopes_openid', class: "block" do %>
+                  <span class="text-sm font-medium text-gray-900">openid</span>
+                  <p class="text-sm text-gray-500 mt-1">OpenID Connect authentication. Required for using Google Sign-In and obtaining ID tokens for secure authentication.</p>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Box -->
+    <div class="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-blue-800">Scope best practices:</h3>
+          <div class="mt-2 text-sm text-blue-700">
+            <ul class="list-disc list-inside space-y-1">
+              <li>Only request scopes that your application actually needs</li>
+              <li>More scopes = more permissions = higher user friction</li>
+              <li>You can always add more scopes later if needed</li>
+              <li>All three scopes above are commonly used together for basic authentication</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="flex justify-between items-center">
+      <%= link_to "Cancel", deploy_assist.root_path, class: "text-gray-600 hover:text-gray-900 font-medium" %>
+      <div class="flex gap-3">
+        <%= link_to deploy_assist.wizards_google_oauth_step_path(step_number: 2, config_id: params[:config_id]), class: "px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors" do %>
+          ← Previous
+        <% end %>
+        <%= button_tag type: "submit", class: "px-6 py-2 bg-[var(--color-accent-500)] hover:bg-[var(--color-accent-600)] text-white font-medium rounded-lg transition-colors" do %>
+          Continue →
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

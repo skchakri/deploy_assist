@@ -1,0 +1,234 @@
+<div class="max-w-3xl mx-auto py-8">
+  <%= render "deploy_assist/shared/header" %>
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Chrome Extension Setup</h1>
+    <p class="text-gray-600">Step 4 of 4: Review & Confirm</p>
+
+    <!-- Progress bar -->
+    <div class="mt-4 w-full bg-gray-200 rounded-full h-2">
+      <div class="bg-blue-600 h-2 rounded-full" style="width: 100%"></div>
+    </div>
+  </div>
+
+  <%= form_with url: deploy_assist.wizards_chrome_extension_step_path(config_id: @service_configuration.id, step_number: 4),
+                method: :patch,
+                local: true do |f| %>
+
+    <!-- Extension Details Review -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold text-gray-900">Extension Details</h2>
+        <%= link_to "Edit",
+            deploy_assist.wizards_chrome_extension_step_path(config_id: @service_configuration.id, step_number: 1),
+            class: "text-blue-600 hover:text-blue-800 text-sm font-medium" %>
+      </div>
+
+      <dl class="space-y-3 text-sm">
+        <div>
+          <dt class="font-medium text-gray-500">Extension Name</dt>
+          <dd class="mt-1 text-gray-900 text-lg"><%= @service_configuration.collected_data['extension_name'] %></dd>
+        </div>
+        <div>
+          <dt class="font-medium text-gray-500">Short Description</dt>
+          <dd class="mt-1 text-gray-900"><%= @service_configuration.collected_data['short_description'] %></dd>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <dt class="font-medium text-gray-500">Category</dt>
+            <dd class="mt-1 text-gray-900"><%= @service_configuration.collected_data['category']&.titleize %></dd>
+          </div>
+          <div>
+            <dt class="font-medium text-gray-500">Language</dt>
+            <dd class="mt-1 text-gray-900"><%= @service_configuration.collected_data['primary_language']&.upcase %></dd>
+          </div>
+        </div>
+        <div>
+          <dt class="font-medium text-gray-500">Permissions Requested</dt>
+          <dd class="mt-2">
+            <div class="flex flex-wrap gap-2">
+              <% (@service_configuration.collected_data['permissions'] || []).each do |permission| %>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                  <%= permission %>
+                </span>
+              <% end %>
+            </div>
+          </dd>
+        </div>
+      </dl>
+    </div>
+
+    <!-- Store Assets Review -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold text-gray-900">Store Assets</h2>
+        <%= link_to "Edit",
+            deploy_assist.wizards_chrome_extension_step_path(config_id: @service_configuration.id, step_number: 2),
+            class: "text-blue-600 hover:text-blue-800 text-sm font-medium" %>
+      </div>
+
+      <dl class="space-y-3 text-sm">
+        <div>
+          <dt class="font-medium text-gray-500">Icon (128x128)</dt>
+          <dd class="mt-1 text-gray-900 font-mono text-xs bg-gray-50 p-2 rounded truncate">
+            <%= @service_configuration.collected_data['small_icon_url'] || 'Not provided' %>
+          </dd>
+        </div>
+        <div>
+          <dt class="font-medium text-gray-500">Screenshots</dt>
+          <dd class="mt-1 text-gray-900">
+            <% screenshot_count = (@service_configuration.collected_data['screenshot_urls'] || '').split("\n").reject(&:blank?).count %>
+            <%= screenshot_count %> screenshot(s) provided
+          </dd>
+        </div>
+        <% if @service_configuration.collected_data['demo_video_url'].present? %>
+          <div>
+            <dt class="font-medium text-gray-500">Demo Video</dt>
+            <dd class="mt-1 text-gray-900 font-mono text-xs bg-gray-50 p-2 rounded truncate">
+              <%= @service_configuration.collected_data['demo_video_url'] %>
+            </dd>
+          </div>
+        <% end %>
+      </dl>
+    </div>
+
+    <!-- Privacy & Compliance Review -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold text-gray-900">Privacy & Compliance</h2>
+        <%= link_to "Edit",
+            deploy_assist.wizards_chrome_extension_step_path(config_id: @service_configuration.id, step_number: 3),
+            class: "text-blue-600 hover:text-blue-800 text-sm font-medium" %>
+      </div>
+
+      <dl class="space-y-3 text-sm">
+        <div>
+          <dt class="font-medium text-gray-500">Privacy Policy</dt>
+          <dd class="mt-1 text-blue-600 hover:text-blue-800">
+            <a href="<%= @service_configuration.collected_data['privacy_policy_url'] %>" target="_blank" class="underline">
+              <%= @service_configuration.collected_data['privacy_policy_url'] %>
+            </a>
+          </dd>
+        </div>
+        <div>
+          <dt class="font-medium text-gray-500">Support Email</dt>
+          <dd class="mt-1 text-gray-900"><%= @service_configuration.collected_data['support_email'] %></dd>
+        </div>
+        <div>
+          <dt class="font-medium text-gray-500">Single Purpose</dt>
+          <dd class="mt-1 text-gray-900 italic">"<%= @service_configuration.collected_data['single_purpose_description'] %>"</dd>
+        </div>
+      </dl>
+    </div>
+
+    <!-- Next Steps Info -->
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6 mb-6">
+      <h3 class="text-lg font-semibold text-blue-900 mb-3">🎉 What Happens Next?</h3>
+      <ol class="space-y-3 text-sm text-blue-800">
+        <li class="flex items-start">
+          <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">1</span>
+          <span><strong>Setup Guide Generated:</strong> You'll receive step-by-step instructions for publishing to Chrome Web Store</span>
+        </li>
+        <li class="flex items-start">
+          <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">2</span>
+          <span><strong>Create Developer Account:</strong> Register for Chrome Web Store Developer account ($5 one-time fee)</span>
+        </li>
+        <li class="flex items-start">
+          <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">3</span>
+          <span><strong>Package Extension:</strong> Create a .zip file with your manifest.json and extension files</span>
+        </li>
+        <li class="flex items-start">
+          <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">4</span>
+          <span><strong>Upload & Submit:</strong> Upload to Chrome Web Store and submit for review</span>
+        </li>
+        <li class="flex items-start">
+          <span class="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-3">5</span>
+          <span><strong>Review Process:</strong> Wait 1-3 business days for approval (longer for sensitive permissions)</span>
+        </li>
+      </ol>
+    </div>
+
+    <!-- Pre-submission Checklist -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">📋 Pre-Submission Checklist</h3>
+      <div class="space-y-2 text-sm">
+        <label class="flex items-start">
+          <input type="checkbox" class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded">
+          <span class="ml-3 text-gray-700">Extension has been thoroughly tested in different scenarios</span>
+        </label>
+        <label class="flex items-start">
+          <input type="checkbox" class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded">
+          <span class="ml-3 text-gray-700">All permissions are necessary and justified</span>
+        </label>
+        <label class="flex items-start">
+          <input type="checkbox" class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded">
+          <span class="ml-3 text-gray-700">Privacy policy is published and accessible</span>
+        </label>
+        <label class="flex items-start">
+          <input type="checkbox" class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded">
+          <span class="ml-3 text-gray-700">Screenshots accurately represent the extension</span>
+        </label>
+        <label class="flex items-start">
+          <input type="checkbox" class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded">
+          <span class="ml-3 text-gray-700">manifest.json follows Manifest V3 format</span>
+        </label>
+        <label class="flex items-start">
+          <input type="checkbox" class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded">
+          <span class="ml-3 text-gray-700">No copyrighted content without permission</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Confirmation -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <div class="flex items-start">
+        <%= f.check_box :confirm,
+            class: "mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500",
+            required: true %>
+        <div class="ml-3">
+          <%= f.label :confirm, class: "text-sm font-medium text-gray-700" do %>
+            I confirm that the information above is correct and I'm ready to proceed with Chrome Web Store submission
+          <% end %>
+          <p class="mt-1 text-xs text-gray-500">
+            You can always come back and modify this configuration later
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Important Note -->
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-yellow-800">Review Timeline</h3>
+          <div class="mt-2 text-sm text-yellow-700">
+            <ul class="list-disc list-inside space-y-1">
+              <li>Standard review: 1-3 business days</li>
+              <li>Extensions with sensitive permissions (webRequest, cookies): 3-7 days</li>
+              <li>First-time publishers may experience longer review times</li>
+              <li>Rejections are common - be prepared to address feedback and resubmit</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="flex justify-between items-center">
+      <%= link_to "Cancel", deploy_assist.root_path, class: "text-gray-600 hover:text-gray-900 font-medium" %>
+      <div class="flex gap-3">
+        <%= link_to deploy_assist.wizards_chrome_extension_step_path(config_id: @service_configuration.id, step_number: 3), class: "px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors" do %>
+          ← Previous
+        <% end %>
+        <%= button_tag type: "submit", class: "px-6 py-2 bg-[var(--color-accent-500)] hover:bg-[var(--color-accent-600)] text-white font-medium rounded-lg transition-colors" do %>
+          Complete Setup
+        <% end %>
+      </div>
+    </div>
+
+  <% end %>
+</div>

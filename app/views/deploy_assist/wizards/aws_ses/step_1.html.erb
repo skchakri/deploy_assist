@@ -1,0 +1,115 @@
+<% domain = @service_configuration.deployment_setup.domain || 'yourapp.com' %>
+
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <%= render "deploy_assist/shared/header" %>
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900">AWS SES Setup - Step 1 of 4</h1>
+    <p class="mt-2 text-gray-600">Email Configuration</p>
+    <div class="mt-4 w-full bg-gray-200 rounded-full h-2">
+      <div class="bg-blue-600 h-2 rounded-full" style="width: 25%"></div>
+    </div>
+  </div>
+
+  <%= form_with url: deploy_assist.wizards_aws_ses_step_path(config_id: @service_configuration.id, step_number: 1),
+                method: :post,
+                local: true,
+                class: "space-y-6" do |form| %>
+
+    <div class="bg-white shadow rounded-lg p-6 space-y-6">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-3">Verification Type</label>
+        <div class="space-y-3">
+          <div class="flex items-start">
+            <div class="flex items-center h-5">
+              <%= form.radio_button "email_config[verification_type]", "domain",
+                                   checked: @step_data['verification_type'] != 'email',
+                                   class: "rounded-full border-gray-300 text-blue-600 focus:ring-blue-500" %>
+            </div>
+            <div class="ml-3">
+              <label class="text-sm font-medium text-gray-700">Domain Verification (Recommended)</label>
+              <p class="text-sm text-gray-500">Verify entire domain - send from any email address</p>
+            </div>
+          </div>
+          <div class="flex items-start">
+            <div class="flex items-center h-5">
+              <%= form.radio_button "email_config[verification_type]", "email",
+                                   checked: @step_data['verification_type'] == 'email',
+                                   class: "rounded-full border-gray-300 text-blue-600 focus:ring-blue-500" %>
+            </div>
+            <div class="ml-3">
+              <label class="text-sm font-medium text-gray-700">Email Address Verification</label>
+              <p class="text-sm text-gray-500">Verify individual email addresses</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="domain-field">
+        <%= form.label :domain, "Domain to Verify", class: "block text-sm font-medium text-gray-700" %>
+        <%= form.text_field "email_config[domain]",
+                           value: @step_data['domain'] || domain,
+                           placeholder: "example.com",
+                           class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+        <p class="mt-1 text-sm text-gray-500">Your domain without 'www' or protocol</p>
+      </div>
+
+      <div id="email-field" style="<%= 'display: none;' if @step_data['verification_type'] != 'email' %>">
+        <%= form.label :email_address, "Email Address to Verify", class: "block text-sm font-medium text-gray-700" %>
+        <%= form.email_field "email_config[email_address]",
+                            value: @step_data['email_address'],
+                            placeholder: "noreply@#{domain}",
+                            class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+      </div>
+
+      <div>
+        <%= form.label :from_name, "Default 'From' Name", class: "block text-sm font-medium text-gray-700" %>
+        <%= form.text_field "email_config[from_name]",
+                           value: @step_data['from_name'] || @service_configuration.deployment_setup.app_display_name,
+                           required: true,
+                           class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+        <p class="mt-1 text-sm text-gray-500">Example: "ProfVault Team"</p>
+      </div>
+
+      <div>
+        <%= form.label :from_email, "Default 'From' Email", class: "block text-sm font-medium text-gray-700" %>
+        <%= form.email_field "email_config[from_email]",
+                            value: @step_data['from_email'] || "noreply@#{domain}",
+                            required: true,
+                            class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+        <p class="mt-1 text-sm text-gray-500">Email address for outgoing emails</p>
+      </div>
+    </div>
+
+    <div class="bg-blue-50 rounded-lg p-4">
+      <h3 class="text-sm font-medium text-blue-900 mb-2">Domain vs Email Verification:</h3>
+      <ul class="list-disc list-inside text-sm text-blue-700 space-y-1">
+        <li><strong>Domain:</strong> Verify once, send from any address @yourdomain.com</li>
+        <li><strong>Email:</strong> Must verify each individual email address</li>
+        <li><strong>Recommended:</strong> Use domain verification for production apps</li>
+      </ul>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="flex justify-between items-center">
+      <%= link_to "Cancel", deploy_assist.root_path, class: "text-gray-600 hover:text-gray-900 font-medium" %>
+      <div class="flex gap-3">
+        <button type="button" disabled class="px-6 py-2 bg-gray-300 text-gray-500 font-medium rounded-lg cursor-not-allowed">
+          ← Previous
+        </button>
+        <%= button_tag type: "submit", class: "px-6 py-2 bg-[var(--color-accent-500)] hover:bg-[var(--color-accent-600)] text-white font-medium rounded-lg transition-colors" do %>
+          Continue →
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<script>
+document.querySelectorAll('input[name="email_config[verification_type]"]').forEach(radio => {
+  radio.addEventListener('change', (e) => {
+    const isDomain = e.target.value === 'domain';
+    document.getElementById('domain-field').style.display = isDomain ? 'block' : 'none';
+    document.getElementById('email-field').style.display = isDomain ? 'none' : 'block';
+  });
+});
+</script>

@@ -1,0 +1,152 @@
+<div class="max-w-3xl mx-auto py-8">
+  <%= render "deploy_assist/shared/header" %>
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-2">Stripe Payment Setup</h1>
+    <p class="text-gray-600">Step 3 of 4: Webhook Configuration</p>
+
+    <!-- Progress bar -->
+    <div class="mt-4 w-full bg-gray-200 rounded-full h-2">
+      <div class="bg-blue-600 h-2 rounded-full" style="width: 75%"></div>
+    </div>
+  </div>
+
+  <%= form_with url: deploy_assist.wizards_stripe_step_path(config_id: @service_configuration.id, step_number: 3),
+                method: :patch,
+                local: true do |f| %>
+
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h2 class="text-xl font-semibold text-gray-900 mb-4">Webhook Settings</h2>
+      <p class="text-sm text-gray-600 mb-6">
+        Webhooks allow Stripe to notify your app about payment events in real-time.
+      </p>
+
+      <div class="space-y-5">
+        <%= fields_for :webhook_config do |w| %>
+
+          <!-- Webhook URL -->
+          <div>
+            <%= w.label :webhook_url, "Webhook Endpoint URL", class: "block text-sm font-medium text-gray-700 mb-1" %>
+            <%= w.url_field :webhook_url,
+                value: @step_data[:webhook_url] || "https://#{@service_configuration.deployment_setup.domain}/webhooks/stripe",
+                class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+                placeholder: "https://yourapp.com/webhooks/stripe",
+                required: true %>
+            <p class="mt-1 text-xs text-gray-500">The URL where Stripe will send webhook events</p>
+          </div>
+
+          <!-- Enable Webhook Automation -->
+          <div class="bg-gray-50 rounded-lg p-4">
+            <div class="flex items-start">
+              <%= w.check_box :enable_webhook_automation,
+                  checked: @step_data[:enable_webhook_automation] != false,
+                  class: "mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" %>
+              <div class="ml-3">
+                <%= w.label :enable_webhook_automation, class: "text-sm font-medium text-gray-700" do %>
+                  Generate webhook handler code
+                <% end %>
+                <p class="mt-1 text-xs text-gray-500">
+                  We'll provide ready-to-use webhook handler code for your Rails app
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Events to Listen For -->
+          <div>
+            <%= w.label :events, "Events to Monitor", class: "block text-sm font-medium text-gray-700 mb-3" %>
+
+            <div class="space-y-2">
+              <% webhook_events = [
+                { id: 'payment_intent.succeeded', label: 'Payment Succeeded', description: 'When a payment is successful' },
+                { id: 'payment_intent.payment_failed', label: 'Payment Failed', description: 'When a payment fails' },
+                { id: 'customer.subscription.created', label: 'Subscription Created', description: 'New subscription started' },
+                { id: 'customer.subscription.updated', label: 'Subscription Updated', description: 'Subscription plan or status changed' },
+                { id: 'customer.subscription.deleted', label: 'Subscription Cancelled', description: 'Subscription was cancelled' },
+                { id: 'invoice.payment_succeeded', label: 'Invoice Paid', description: 'Recurring invoice payment successful' },
+                { id: 'invoice.payment_failed', label: 'Invoice Failed', description: 'Recurring invoice payment failed' },
+                { id: 'checkout.session.completed', label: 'Checkout Completed', description: 'Checkout session completed successfully' }
+              ] %>
+
+              <% selected_events = @step_data[:events] || webhook_events.first(4).map { |e| e[:id] } %>
+
+              <% webhook_events.each do |event| %>
+                <div class="flex items-start bg-white border border-gray-200 rounded-lg p-3">
+                  <%= check_box_tag 'webhook_config[events][]', event[:id], selected_events.include?(event[:id]),
+                      class: "mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500",
+                      id: "webhook_event_#{event[:id].gsub('.', '_')}" %>
+                  <div class="ml-3">
+                    <label for="webhook_event_<%= event[:id].gsub('.', '_') %>" class="text-sm font-medium text-gray-900"><%= event[:label] %></label>
+                    <p class="text-xs text-gray-500"><%= event[:description] %></p>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Webhook Info Box -->
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-yellow-800">Important: Webhook Security</h3>
+          <div class="mt-2 text-sm text-yellow-700">
+            <p>Always verify webhook signatures to ensure requests come from Stripe. We'll provide code that includes signature verification.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Why Webhooks Box -->
+    <div class="bg-gradient-to-r from-green-50 to-teal-50 border border-green-200 rounded-lg p-5 mb-6">
+      <h3 class="text-sm font-semibold text-green-900 mb-3">🎯 Why Use Webhooks?</h3>
+      <ul class="space-y-2 text-sm text-green-800">
+        <li class="flex items-start">
+          <svg class="h-5 w-5 text-green-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          <span><strong>Real-time updates:</strong> Get notified instantly when payments succeed or fail</span>
+        </li>
+        <li class="flex items-start">
+          <svg class="h-5 w-5 text-green-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          <span><strong>Subscription management:</strong> Handle renewals, cancellations, and upgrades</span>
+        </li>
+        <li class="flex items-start">
+          <svg class="h-5 w-5 text-green-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          <span><strong>Reliable delivery:</strong> Stripe retries failed webhook deliveries automatically</span>
+        </li>
+        <li class="flex items-start">
+          <svg class="h-5 w-5 text-green-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          <span><strong>Async processing:</strong> Handle payment events without blocking user requests</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Navigation Buttons -->
+    <div class="flex justify-between items-center">
+      <%= link_to "Cancel", deploy_assist.root_path, class: "text-gray-600 hover:text-gray-900 font-medium" %>
+      <div class="flex gap-3">
+        <%= link_to deploy_assist.wizards_stripe_step_path(config_id: @service_configuration.id, step_number: 2), class: "px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors" do %>
+          ← Previous
+        <% end %>
+        <%= button_tag type: "submit", class: "px-6 py-2 bg-[var(--color-accent-500)] hover:bg-[var(--color-accent-600)] text-white font-medium rounded-lg transition-colors" do %>
+          Continue →
+        <% end %>
+      </div>
+    </div>
+
+  <% end %>
+</div>
