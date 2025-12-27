@@ -121,10 +121,9 @@
               <% chrome_permissions.each do |permission| %>
                 <div class="flex items-start bg-gray-50 border border-gray-200 rounded-lg p-3">
                   <%= ed.check_box :permissions,
-                      { multiple: true, checked: selected_permissions.include?(permission[:id]) },
+                      { multiple: true, checked: selected_permissions.include?(permission[:id]), class: "mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" },
                       permission[:id],
-                      nil,
-                      class: "mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" %>
+                      nil %>
                   <div class="ml-3">
                     <label class="text-sm font-medium text-gray-900"><%= permission[:label] %></label>
                     <p class="text-xs text-gray-500"><%= permission[:description] %></p>
