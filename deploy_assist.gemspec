@@ -22,5 +22,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "aws-sdk-s3", "~> 1.0"
   spec.add_dependency "aws-sdk-rds", "~> 1.0"
   spec.add_dependency "aws-sdk-ses", "~> 1.0"
-  spec.add_dependency "stripe", "~> 12.0"
+  spec.add_dependency "stripe", ">= 12", "< 19"
 end
